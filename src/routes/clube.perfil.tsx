@@ -10,8 +10,7 @@ import {
   TIER_ORDER,
 } from "@/lib/clube";
 import { supabase } from "@/lib/supabase";
-import { getTheme, toggleTheme, type Theme } from "@/lib/theme";
-import { Copy, Check, LogOut, ChevronRight, Sun, Moon } from "lucide-react";
+import { Copy, Check, LogOut, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/clube/perfil")({
   component: ProtectedPerfil,
@@ -39,7 +38,6 @@ function ProtectedPerfil() {
 function Perfil({ membro }: { membro: Membro }) {
   const [copied, setCopied] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [tema, setTema] = useState<Theme>(getTheme);
   const navigate = useNavigate();
 
   const { tier, progress, mesesParaProximo } = tierProgress(membro.meses_contrato);
@@ -60,11 +58,6 @@ function Perfil({ membro }: { membro: Membro }) {
     });
   }
 
-  function handleToggleTema() {
-    const next = toggleTheme();
-    setTema(next);
-  }
-
   async function handleLogout() {
     setLoggingOut(true);
     await supabase.auth.signOut();
@@ -77,8 +70,8 @@ function Perfil({ membro }: { membro: Membro }) {
         {/* Header do perfil */}
         <div className="flex items-center gap-4">
           <div
-            className="grid h-14 w-14 shrink-0 place-items-center rounded-full text-lg font-bold text-white"
-            style={{ background: cfg.bg, border: `2px solid ${cfg.color}` }}
+            className="grid h-14 w-14 shrink-0 place-items-center rounded-full text-lg font-bold"
+            style={{ background: cfg.bg, border: `2px solid ${cfg.color}`, color: cfg.color }}
           >
             {membro.nome.charAt(0).toUpperCase()}
           </div>
@@ -213,24 +206,6 @@ function Perfil({ membro }: { membro: Membro }) {
           <QuickLink label="Resgatar pontos" to="/clube/resgates" />
           <QuickLink label="Benefícios disponíveis" to="/clube/beneficios" />
           <QuickLink label="Início do clube" to="/clube/dashboard" />
-
-          {/* Tema */}
-          <button
-            onClick={handleToggleTema}
-            className="flex w-full items-center justify-between px-4 py-4 text-sm transition-colors border-t"
-            style={{ borderColor: "var(--hairline)", color: "var(--ink-muted)" }}
-          >
-            <span>
-              {tema === "dark" ? "Tema claro" : "Tema escuro"}
-            </span>
-            <div className="flex items-center gap-2">
-              {tema === "dark" ? (
-                <Sun className="h-4 w-4" />
-              ) : (
-                <Moon className="h-4 w-4" />
-              )}
-            </div>
-          </button>
 
           <Link
             to="/"
