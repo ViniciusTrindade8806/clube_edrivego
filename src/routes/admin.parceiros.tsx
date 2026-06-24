@@ -35,6 +35,7 @@ function AdminParceiros() {
   const [parceiros, setParceiros] = useState<ParceiroComBeneficios[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [showAddP, setShowAddP] = useState(false);
   const [pForm, setPForm] = useState<PForm>(EMPTY_P);
@@ -43,7 +44,21 @@ function AdminParceiros() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    setParceiros(await getTodosParceirosAdmin());
+    setSaveError(null);
+    const { data, error } = await supabase
+      .from("parceiros")
+      .select("*, beneficios_parceiros(*)")
+      .order("created_at", { ascending: false });
+    if (error) {
+      setSaveError(
+        error.code === "42P01"
+          ? "Tabela 'parceiros' não existe. Execute o arquivo parceiros.sql no Supabase SQL Editor."
+          : `Erro ao carregar: ${error.message}`
+      );
+      setParceiros([]);
+    } else {
+      setParceiros((data ?? []) as ParceiroComBeneficios[]);
+    }
     setLoading(false);
   }, []);
 
@@ -52,14 +67,23 @@ function AdminParceiros() {
   async function saveParceiro() {
     if (!pForm.nome.trim()) return;
     setSaving(true);
-    const { data } = await supabase.from("parceiros").insert({
+    setSaveError(null);
+    const { data, error } = await supabase.from("parceiros").insert({
       nome: pForm.nome.trim(),
       categoria: pForm.categoria,
       logo_emoji: pForm.logo_emoji || "🏪",
       descricao: pForm.descricao.trim() || null,
       cidade: pForm.cidade.trim() || "Salvador, BA",
     }).select().single();
-    if (data) {
+    if (error) {
+      setSaveError(
+        error.code === "42P01"
+          ? "Tabela não existe. Execute parceiros.sql no Supabase SQL Editor primeiro."
+          : error.code === "42501"
+          ? "Sem permissão. Execute as políticas RLS do parceiros.sql no Supabase."
+          : `Erro: ${error.message}`
+      );
+    } else if (data) {
       setParceiros((prev) => [{ ...(data as Parceiro), beneficios_parceiros: [] }, ...prev]);
       setPForm(EMPTY_P);
       setShowAddP(false);
@@ -142,6 +166,17 @@ function AdminParceiros() {
 
   return (
     <div>
+      {/* Banner de erro global */}
+      {saveError && (
+        <div
+          className="rounded-xl border p-4 mb-4 text-sm"
+          style={{ borderColor: "rgba(240,68,56,0.25)", background: "rgba(240,68,56,0.07)", color: "var(--loss)" }}
+        >
+          <p className="font-semibold mb-1">Erro</p>
+          <p className="text-xs" style={{ color: "var(--ink-muted)" }}>{saveError}</p>
+        </div>
+      )}
+
       {/* Cabeçalho */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-lg font-bold" style={{ color: "var(--ink)" }}>
