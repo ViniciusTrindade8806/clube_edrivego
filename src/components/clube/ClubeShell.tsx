@@ -22,11 +22,13 @@ export function ClubeShell({ children, tier }: ClubeShellProps) {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header
-        className="sticky top-0 z-40 flex items-center justify-between px-4 py-3 border-b"
+        className="sticky top-0 z-40 flex items-center justify-between px-4 border-b"
         style={{
           backgroundColor: "rgba(12,12,12,0.97)",
           borderColor: "rgba(255,255,255,0.07)",
           backdropFilter: "blur(16px)",
+          paddingTop: "calc(0.75rem + env(safe-area-inset-top))",
+          paddingBottom: "0.75rem",
         }}
       >
         <Link to="/" aria-label="e-Drive Go home">
@@ -35,7 +37,12 @@ export function ClubeShell({ children, tier }: ClubeShellProps) {
         {tier && <TierBadge tier={tier} size="sm" />}
       </header>
 
-      <main className="flex-1 overflow-auto pb-20">{children}</main>
+      <main
+        className="flex-1 overflow-auto"
+        style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}
+      >
+        {children}
+      </main>
 
       <nav
         className="fixed inset-x-0 bottom-0 z-40 flex border-t"
@@ -43,6 +50,7 @@ export function ClubeShell({ children, tier }: ClubeShellProps) {
           backgroundColor: "rgba(12,12,12,0.97)",
           borderColor: "rgba(255,255,255,0.07)",
           backdropFilter: "blur(16px)",
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
         {NAV.map(({ to, icon: Icon, label }) => {
