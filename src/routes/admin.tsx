@@ -1,12 +1,13 @@
 import { createFileRoute, Outlet, redirect, Link, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/lib/supabase";
-import { Users, Store, LogOut } from "lucide-react";
+import { Users, Store, LogOut, Gift } from "lucide-react";
 
 const ADMIN_EMAIL = "vini@admin.com";
 
 const NAV = [
   { to: "/admin/membros" as const, icon: Users, label: "Membros" },
   { to: "/admin/parceiros" as const, icon: Store, label: "Parceiros" },
+  { to: "/admin/resgates" as const, icon: Gift, label: "Resgates" },
 ];
 
 export const Route = createFileRoute("/admin")({

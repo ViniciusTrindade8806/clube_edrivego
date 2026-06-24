@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { supabase } from "@/lib/supabase";
 import { TIER_CONFIG, type Tier } from "@/lib/clube";
-import { Edit2, Check, X, RefreshCw, AlertCircle } from "lucide-react";
+import { Edit2, Check, X, RefreshCw, AlertCircle, Star, Plus, Minus } from "lucide-react";
 
 type MembroAdmin = {
   id: string;
@@ -24,9 +24,16 @@ function AdminMembros() {
   const [membros, setMembros] = useState<MembroAdmin[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  // Editar meses
   const [editId, setEditId] = useState<string | null>(null);
   const [editMeses, setEditMeses] = useState(0);
-  const [saving, setSaving] = useState(false);
+
+  // Dar/remover pontos
+  const [pontosId, setPontosId] = useState<string | null>(null);
+  const [pontosValor, setPontosValor] = useState("");
+  const [pontosDesc, setPontosDesc] = useState("");
 
   const fetchMembros = useCallback(async () => {
     setLoading(true);
@@ -58,6 +65,25 @@ function AdminMembros() {
     setSaving(false);
   }
 
+  async function darPontos(m: MembroAdmin) {
+    const valor = parseInt(pontosValor);
+    if (isNaN(valor) || valor === 0) return;
+    setSaving(true);
+    const novosPontos = Math.max(0, m.pontos + valor);
+    await supabase.from("membros").update({ pontos: novosPontos }).eq("id", m.id);
+    await supabase.from("pontos_transacoes").insert({
+      membro_id: m.id,
+      valor,
+      descricao: pontosDesc.trim() || (valor > 0 ? "Adicionado pelo admin" : "Removido pelo admin"),
+      tipo: "manual",
+    });
+    await fetchMembros();
+    setPontosId(null);
+    setPontosValor("");
+    setPontosDesc("");
+    setSaving(false);
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -74,7 +100,7 @@ function AdminMembros() {
           <p className="text-sm font-semibold" style={{ color: "var(--loss)" }}>Erro de permissão</p>
           <p className="mt-1 text-xs" style={{ color: "var(--ink-muted)" }}>{erro}</p>
           <p className="mt-3 text-xs font-mono rounded p-2 select-all" style={{ background: "var(--card-bg)", color: "var(--ink)" }}>
-            {`-- Cole no Supabase SQL Editor:\ncreate policy "admin lê todos"\n  on public.membros for select\n  using (auth.email() = 'vini@admin.com');\n\ncreate policy "admin atualiza qualquer"\n  on public.membros for update\n  using (auth.email() = 'vini@admin.com');`}
+            {`create policy "admin le todos"\n  on public.membros for select\n  using (auth.email() = 'vini@admin.com');\n\ncreate policy "admin atualiza qualquer"\n  on public.membros for update\n  using (auth.email() = 'vini@admin.com');`}
           </p>
         </div>
       </div>
@@ -90,27 +116,19 @@ function AdminMembros() {
             ({membros.length})
           </span>
         </h1>
-        <button
-          onClick={fetchMembros}
-          className="p-2 rounded-lg transition-colors"
-          style={{ color: "var(--ink-muted)" }}
-          aria-label="Atualizar"
-        >
+        <button onClick={fetchMembros} className="p-2 rounded-lg" style={{ color: "var(--ink-muted)" }}>
           <RefreshCw className="h-4 w-4" />
         </button>
       </div>
 
-      {/* Legenda de tiers */}
+      {/* Contadores por tier */}
       <div className="flex gap-3 mb-4">
         {(["bronze", "prata", "ouro"] as Tier[]).map((t) => {
           const cfg = TIER_CONFIG[t];
           const count = membros.filter((m) => m.tier_id === t).length;
           return (
-            <div
-              key={t}
-              className="flex-1 rounded-lg border p-3 text-center"
-              style={{ borderColor: cfg.border, background: cfg.bg }}
-            >
+            <div key={t} className="flex-1 rounded-lg border p-3 text-center"
+              style={{ borderColor: cfg.border, background: cfg.bg }}>
               <p className="text-lg font-bold" style={{ color: cfg.color }}>{count}</p>
               <p className="text-[10px] font-semibold uppercase" style={{ color: cfg.color }}>{cfg.label}</p>
             </div>
@@ -120,66 +138,49 @@ function AdminMembros() {
 
       <div className="flex flex-col gap-3">
         {membros.map((m) => {
-          const isEditing = editId === m.id;
+          const isEditingMeses = editId === m.id;
+          const isEditingPontos = pontosId === m.id;
           const cfg = TIER_CONFIG[m.tier_id];
           const dataEntrada = new Date(m.created_at).toLocaleDateString("pt-BR", {
             day: "2-digit", month: "short", year: "numeric",
           });
 
           return (
-            <div
-              key={m.id}
-              className="rounded-xl border p-4"
+            <div key={m.id} className="rounded-xl border p-4"
               style={{
                 background: "var(--card-bg)",
-                borderColor: isEditing ? cfg.border : "var(--card-border)",
-              }}
-            >
+                borderColor: isEditingMeses || isEditingPontos ? cfg.border : "var(--card-border)",
+              }}>
+              {/* Nome / email / tier */}
               <div className="flex items-start justify-between gap-2 mb-3">
                 <div className="min-w-0">
                   <p className="font-semibold truncate" style={{ color: "var(--ink)" }}>{m.nome}</p>
                   <p className="text-xs truncate" style={{ color: "var(--ink-muted)" }}>{m.email}</p>
-                  {m.whatsapp && (
-                    <p className="text-xs" style={{ color: "var(--ink-muted)" }}>{m.whatsapp}</p>
-                  )}
                 </div>
-                <span
-                  className="shrink-0 px-2 py-0.5 rounded text-xs font-bold"
-                  style={{ color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}` }}
-                >
+                <span className="shrink-0 px-2 py-0.5 rounded text-xs font-bold"
+                  style={{ color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}` }}>
                   {cfg.label}
                 </span>
               </div>
 
+              {/* Stats + ações */}
               <div className="flex items-center justify-between">
                 <div className="flex gap-4">
-                  {/* Meses — editável */}
                   <div>
                     <p className="text-[10px] uppercase tracking-wider mb-0.5" style={{ color: "var(--ink-muted)" }}>Meses</p>
-                    {isEditing ? (
-                      <input
-                        type="number"
-                        min={0}
-                        max={999}
-                        value={editMeses}
+                    {isEditingMeses ? (
+                      <input type="number" min={0} max={999} value={editMeses}
                         onChange={(e) => setEditMeses(Number(e.target.value))}
                         className="w-16 rounded border px-2 py-1 text-sm outline-none"
-                        style={{
-                          borderColor: "var(--input-border)",
-                          background: "var(--input-bg)",
-                          color: "var(--ink)",
-                        }}
-                      />
+                        style={{ borderColor: "var(--input-border)", background: "var(--input-bg)", color: "var(--ink)" }} />
                     ) : (
                       <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>{m.meses_contrato}</p>
                     )}
                   </div>
-
                   <div>
                     <p className="text-[10px] uppercase tracking-wider mb-0.5" style={{ color: "var(--ink-muted)" }}>Pontos</p>
-                    <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>{m.pontos}</p>
+                    <p className="text-sm font-bold" style={{ color: isEditingPontos ? "var(--gain)" : "var(--ink)" }}>{m.pontos}</p>
                   </div>
-
                   <div>
                     <p className="text-[10px] uppercase tracking-wider mb-0.5" style={{ color: "var(--ink-muted)" }}>Entrou</p>
                     <p className="text-xs" style={{ color: "var(--ink-muted)" }}>{dataEntrada}</p>
@@ -187,38 +188,80 @@ function AdminMembros() {
                 </div>
 
                 <div className="flex gap-1">
-                  {isEditing ? (
+                  {isEditingMeses ? (
                     <>
-                      <button
-                        onClick={() => saveEdit(m.id)}
-                        disabled={saving}
-                        className="p-2 rounded-lg transition-colors"
-                        style={{ background: "rgba(0,230,118,0.10)" }}
-                        aria-label="Salvar"
-                      >
+                      <button onClick={() => saveEdit(m.id)} disabled={saving}
+                        className="p-2 rounded-lg" style={{ background: "rgba(0,230,118,0.10)" }}>
                         <Check className="h-4 w-4" style={{ color: "var(--gain)" }} />
                       </button>
-                      <button
-                        onClick={() => setEditId(null)}
-                        className="p-2 rounded-lg transition-colors"
-                        style={{ background: "var(--card-bg)" }}
-                        aria-label="Cancelar"
-                      >
+                      <button onClick={() => setEditId(null)} className="p-2 rounded-lg" style={{ background: "var(--card-bg)" }}>
                         <X className="h-4 w-4" style={{ color: "var(--ink-muted)" }} />
                       </button>
                     </>
                   ) : (
-                    <button
-                      onClick={() => { setEditId(m.id); setEditMeses(m.meses_contrato); }}
-                      className="p-2 rounded-lg transition-colors"
-                      style={{ background: "var(--card-bg)" }}
-                      aria-label="Editar meses"
-                    >
-                      <Edit2 className="h-4 w-4" style={{ color: "var(--ink-muted)" }} />
-                    </button>
+                    <>
+                      {/* Editar meses */}
+                      <button
+                        onClick={() => { setEditId(m.id); setEditMeses(m.meses_contrato); setPontosId(null); }}
+                        className="p-2 rounded-lg" style={{ background: "var(--card-bg)" }}
+                        title="Editar meses de contrato">
+                        <Edit2 className="h-4 w-4" style={{ color: "var(--ink-muted)" }} />
+                      </button>
+                      {/* Gerenciar pontos */}
+                      <button
+                        onClick={() => { setPontosId(isEditingPontos ? null : m.id); setEditId(null); setPontosValor(""); setPontosDesc(""); }}
+                        className="p-2 rounded-lg"
+                        style={{ background: isEditingPontos ? "rgba(0,230,118,0.12)" : "var(--card-bg)" }}
+                        title="Adicionar / remover pontos">
+                        <Star className="h-4 w-4" style={{ color: isEditingPontos ? "var(--gain)" : "var(--ink-muted)" }} />
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
+
+              {/* Painel de pontos */}
+              {isEditingPontos && (
+                <div className="mt-3 pt-3 border-t space-y-2" style={{ borderColor: "var(--hairline)" }}>
+                  <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--gain)" }}>
+                    Ajustar pontos · saldo atual: {m.pontos}
+                  </p>
+                  <div className="flex gap-2">
+                    <div className="flex items-center gap-1 rounded-lg border overflow-hidden"
+                      style={{ borderColor: "var(--input-border)", background: "var(--input-bg)" }}>
+                      <button onClick={() => setPontosValor(v => String((parseInt(v) || 0) - 100))}
+                        className="px-2 py-2" style={{ color: "var(--loss)" }}>
+                        <Minus className="h-3.5 w-3.5" />
+                      </button>
+                      <input type="number" value={pontosValor}
+                        onChange={(e) => setPontosValor(e.target.value)}
+                        placeholder="ex: 500"
+                        className="w-20 bg-transparent text-center text-sm outline-none"
+                        style={{ color: Number(pontosValor) < 0 ? "var(--loss)" : "var(--ink)" }} />
+                      <button onClick={() => setPontosValor(v => String((parseInt(v) || 0) + 100))}
+                        className="px-2 py-2" style={{ color: "var(--gain)" }}>
+                        <Plus className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <input value={pontosDesc} onChange={(e) => setPontosDesc(e.target.value)}
+                      placeholder="Motivo (opcional)"
+                      className="flex-1 rounded-lg border px-3 py-2 text-sm outline-none"
+                      style={{ borderColor: "var(--input-border)", background: "var(--input-bg)", color: "var(--ink)" }} />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button onClick={() => setPontosId(null)}
+                      className="rounded-lg px-3 py-1.5 text-xs" style={{ color: "var(--ink-muted)" }}>
+                      Cancelar
+                    </button>
+                    <button onClick={() => darPontos(m)}
+                      disabled={saving || !pontosValor || pontosValor === "0"}
+                      className="rounded-lg px-4 py-1.5 text-xs font-semibold disabled:opacity-50"
+                      style={{ background: Number(pontosValor) < 0 ? "rgba(240,68,56,0.15)" : "rgba(0,230,118,0.15)", color: Number(pontosValor) < 0 ? "var(--loss)" : "var(--gain)" }}>
+                      {saving ? "Salvando…" : Number(pontosValor) >= 0 ? `+${pontosValor} pontos` : `${pontosValor} pontos`}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}

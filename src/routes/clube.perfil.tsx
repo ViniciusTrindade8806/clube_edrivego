@@ -156,10 +156,11 @@ function Perfil({ membro }: { membro: Membro }) {
             <p className="text-xs uppercase tracking-wider" style={{ color: "var(--ink-muted)" }}>Pontos acumulados</p>
             <p className="font-display text-2xl font-extrabold mt-0.5" style={{ color: "var(--ink)" }}>{membro.pontos}</p>
           </div>
-          <div className="text-right">
-            <p className="text-[10px]" style={{ color: "var(--ink-muted)" }}>Use nos benefícios</p>
-            <p className="text-[10px] mt-0.5" style={{ color: "var(--ink-muted)" }}>em breve</p>
-          </div>
+          <Link to="/clube/resgates"
+            className="rounded-lg px-3 py-2 text-xs font-semibold"
+            style={{ background: "rgba(0,230,118,0.12)", color: "var(--gain)" }}>
+            Resgatar →
+          </Link>
         </div>
 
         {/* Indicação */}
@@ -209,6 +210,7 @@ function Perfil({ membro }: { membro: Membro }) {
           className="rounded-xl border overflow-hidden"
           style={{ borderColor: "var(--card-border)" }}
         >
+          <QuickLink label="Resgatar pontos" to="/clube/resgates" />
           <QuickLink label="Benefícios disponíveis" to="/clube/beneficios" />
           <QuickLink label="Início do clube" to="/clube/dashboard" />
 
@@ -262,7 +264,7 @@ function Perfil({ membro }: { membro: Membro }) {
 function QuickLink({ label, to }: { label: string; to: string }) {
   return (
     <Link
-      to={to as "/clube/beneficios" | "/clube/dashboard"}
+      to={to as "/clube/resgates" | "/clube/beneficios" | "/clube/dashboard"}
       className="flex items-center justify-between px-4 py-4 text-sm transition-colors border-b last:border-b-0"
       style={{ borderColor: "var(--hairline)", color: "var(--ink-muted)" }}
     >
