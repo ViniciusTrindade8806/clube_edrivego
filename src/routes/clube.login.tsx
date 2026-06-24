@@ -4,6 +4,8 @@ import { Logo } from "@/components/Logo";
 import { supabase } from "@/lib/supabase";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 
+const ADMIN_EMAIL = "vini@admin.com";
+
 export const Route = createFileRoute("/clube/login")({
   component: ClubeLogin,
 });
@@ -21,11 +23,13 @@ function ClubeLogin() {
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Redireciona se já autenticado (auto-login)
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate({ to: "/clube/dashboard" });
-      else setChecking(false);
+      if (session) {
+        navigate({ to: session.user.email === ADMIN_EMAIL ? "/admin/membros" : "/clube/dashboard" });
+      } else {
+        setChecking(false);
+      }
     });
   }, [navigate]);
 
@@ -35,12 +39,14 @@ function ClubeLogin() {
     setLoading(true);
 
     if (mode === "login") {
-      const { error: err } = await supabase.auth.signInWithPassword({ email, password: senha });
+      const { data, error: err } = await supabase.auth.signInWithPassword({ email, password: senha });
       if (err) {
         setError("E-mail ou senha incorretos. Verifique e tente novamente.");
         setLoading(false);
         return;
       }
+      navigate({ to: data.user?.email === ADMIN_EMAIL ? "/admin/membros" : "/clube/dashboard" });
+      return;
     } else {
       if (nome.trim().length < 2) {
         setError("Informe seu nome completo.");
@@ -80,14 +86,16 @@ function ClubeLogin() {
           <Link to="/clube" className="mb-6">
             <Logo />
           </Link>
-          <span className="mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:var(--ink-muted)]"
-            style={{ borderColor: "rgba(255,255,255,0.10)" }}>
+          <span
+            className="mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em]"
+            style={{ borderColor: "var(--input-border)", color: "var(--ink-muted)" }}
+          >
             Clube de Benefícios
           </span>
-          <h1 className="font-display text-2xl font-bold">
+          <h1 className="font-display text-2xl font-bold" style={{ color: "var(--ink)" }}>
             {mode === "login" ? "Entrar na sua conta" : "Criar sua conta"}
           </h1>
-          <p className="mt-2 text-sm text-[color:var(--ink-muted)]">
+          <p className="mt-2 text-sm" style={{ color: "var(--ink-muted)" }}>
             {mode === "login"
               ? "Você ficará conectado automaticamente nas próximas visitas."
               : "Crie sua conta e acesse todos os benefícios."}
@@ -117,7 +125,10 @@ function ClubeLogin() {
           />
 
           <div className="block">
-            <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--ink-muted)]">
+            <span
+              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em]"
+              style={{ color: "var(--ink-muted)" }}
+            >
               Senha
             </span>
             <div className="relative">
@@ -129,13 +140,18 @@ function ClubeLogin() {
                 autoComplete={mode === "login" ? "current-password" : "new-password"}
                 required
                 minLength={6}
-                className="w-full rounded-lg border bg-white/[0.04] px-4 py-4 pr-12 text-base text-white placeholder:text-[color:var(--ink-muted)]/50 outline-none transition focus:border-white/30 focus:ring-1 focus:ring-white/20"
-                style={{ borderColor: "rgba(255,255,255,0.10)" }}
+                className="w-full rounded-lg border px-4 py-4 pr-12 text-base placeholder:opacity-40 outline-none transition focus:border-[color:var(--ink-muted)]"
+                style={{
+                  borderColor: "var(--input-border)",
+                  background: "var(--input-bg)",
+                  color: "var(--ink)",
+                }}
               />
               <button
                 type="button"
                 onClick={() => setShowSenha((v) => !v)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[color:var(--ink-muted)] hover:text-white transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors"
+                style={{ color: "var(--ink-muted)" }}
                 aria-label={showSenha ? "Ocultar senha" : "Mostrar senha"}
               >
                 {showSenha ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -144,7 +160,10 @@ function ClubeLogin() {
           </div>
 
           {error && (
-            <div className="rounded-lg border border-[color:var(--loss)]/20 bg-[color:var(--loss)]/[0.06] px-4 py-3 text-sm text-[color:var(--loss)]">
+            <div
+              className="rounded-lg border px-4 py-3 text-sm"
+              style={{ borderColor: "rgba(240,68,56,0.20)", background: "rgba(240,68,56,0.06)", color: "var(--loss)" }}
+            >
               {error}
             </div>
           )}
@@ -152,7 +171,8 @@ function ClubeLogin() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 w-full rounded-lg bg-[color:var(--gain)] px-6 py-4 text-base font-semibold text-[#062b14] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-2 w-full rounded-lg px-6 py-4 text-base font-semibold transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            style={{ background: "var(--gain)", color: "#062b14" }}
           >
             {loading
               ? mode === "login" ? "Entrando..." : "Criando conta..."
@@ -161,11 +181,12 @@ function ClubeLogin() {
         </form>
 
         {/* Switch mode */}
-        <p className="mt-6 text-center text-sm text-[color:var(--ink-muted)]">
+        <p className="mt-6 text-center text-sm" style={{ color: "var(--ink-muted)" }}>
           {mode === "login" ? "Não tem conta ainda?" : "Já tem uma conta?"}{" "}
           <button
             onClick={switchMode}
-            className="font-semibold text-white underline underline-offset-4 hover:opacity-70"
+            className="font-semibold underline underline-offset-4 hover:opacity-70"
+            style={{ color: "var(--ink)" }}
           >
             {mode === "login" ? "Criar conta" : "Fazer login"}
           </button>
@@ -174,7 +195,8 @@ function ClubeLogin() {
         <div className="mt-6 flex justify-center">
           <Link
             to="/clube"
-            className="flex items-center gap-1.5 text-xs text-[color:var(--ink-muted)] hover:text-white transition-colors"
+            className="flex items-center gap-1.5 text-xs transition-colors"
+            style={{ color: "var(--ink-muted)" }}
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Voltar para o clube
@@ -197,7 +219,10 @@ function FormField({
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value">) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--ink-muted)]">
+      <span
+        className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em]"
+        style={{ color: "var(--ink-muted)" }}
+      >
         {label}
       </span>
       <input
@@ -205,8 +230,12 @@ function FormField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required
-        className="w-full rounded-lg border bg-white/[0.04] px-4 py-4 text-base text-white placeholder:text-[color:var(--ink-muted)]/50 outline-none transition focus:border-white/30 focus:ring-1 focus:ring-white/20"
-        style={{ borderColor: "rgba(255,255,255,0.10)" }}
+        className="w-full rounded-lg border px-4 py-4 text-base placeholder:opacity-40 outline-none transition focus:border-[color:var(--ink-muted)]"
+        style={{
+          borderColor: "var(--input-border)",
+          background: "var(--input-bg)",
+          color: "var(--ink)",
+        }}
       />
     </label>
   );
@@ -215,7 +244,7 @@ function FormField({
 function FullLoader() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-[color:var(--gain)]" />
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-t-[color:var(--gain)]" style={{ borderColor: "var(--hairline)" }} />
     </div>
   );
 }

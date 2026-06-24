@@ -24,8 +24,8 @@ export function ClubeShell({ children, tier }: ClubeShellProps) {
       <header
         className="sticky top-0 z-40 flex items-center justify-between px-4 border-b"
         style={{
-          backgroundColor: "rgba(12,12,12,0.97)",
-          borderColor: "rgba(255,255,255,0.07)",
+          backgroundColor: "var(--glass)",
+          borderColor: "var(--hairline)",
           backdropFilter: "blur(16px)",
           paddingTop: "calc(0.75rem + env(safe-area-inset-top))",
           paddingBottom: "0.75rem",
@@ -47,8 +47,8 @@ export function ClubeShell({ children, tier }: ClubeShellProps) {
       <nav
         className="fixed inset-x-0 bottom-0 z-40 flex border-t"
         style={{
-          backgroundColor: "rgba(12,12,12,0.97)",
-          borderColor: "rgba(255,255,255,0.07)",
+          backgroundColor: "var(--glass)",
+          borderColor: "var(--hairline)",
           backdropFilter: "blur(16px)",
           paddingBottom: "env(safe-area-inset-bottom)",
         }}

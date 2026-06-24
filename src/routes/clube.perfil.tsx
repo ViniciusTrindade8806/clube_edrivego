@@ -10,7 +10,8 @@ import {
   TIER_ORDER,
 } from "@/lib/clube";
 import { supabase } from "@/lib/supabase";
-import { Copy, Check, LogOut, ChevronRight } from "lucide-react";
+import { getTheme, toggleTheme, type Theme } from "@/lib/theme";
+import { Copy, Check, LogOut, ChevronRight, Sun, Moon } from "lucide-react";
 
 export const Route = createFileRoute("/clube/perfil")({
   component: ProtectedPerfil,
@@ -38,6 +39,7 @@ function ProtectedPerfil() {
 function Perfil({ membro }: { membro: Membro }) {
   const [copied, setCopied] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [tema, setTema] = useState<Theme>(getTheme);
   const navigate = useNavigate();
 
   const { tier, progress, mesesParaProximo } = tierProgress(membro.meses_contrato);
@@ -58,6 +60,11 @@ function Perfil({ membro }: { membro: Membro }) {
     });
   }
 
+  function handleToggleTema() {
+    const next = toggleTheme();
+    setTema(next);
+  }
+
   async function handleLogout() {
     setLoggingOut(true);
     await supabase.auth.signOut();
@@ -76,8 +83,8 @@ function Perfil({ membro }: { membro: Membro }) {
             {membro.nome.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h1 className="font-display text-lg font-bold text-white">{membro.nome}</h1>
-            <p className="text-sm text-[color:var(--ink-muted)]">{membro.email}</p>
+            <h1 className="font-display text-lg font-bold" style={{ color: "var(--ink)" }}>{membro.nome}</h1>
+            <p className="text-sm" style={{ color: "var(--ink-muted)" }}>{membro.email}</p>
           </div>
         </div>
 
@@ -88,14 +95,14 @@ function Perfil({ membro }: { membro: Membro }) {
         >
           <div className="flex items-center justify-between mb-4">
             <TierBadge tier={tier} size="lg" />
-            <span className="text-sm text-[color:var(--ink-muted)]">
+            <span className="text-sm" style={{ color: "var(--ink-muted)" }}>
               {membro.meses_contrato} mes{membro.meses_contrato !== 1 ? "es" : ""}
             </span>
           </div>
 
           {/* Linha do tier */}
           <div className="flex items-center gap-2 mb-3">
-            {TIER_ORDER.map((t, i) => {
+            {TIER_ORDER.map((t) => {
               const tcfg = TIER_CONFIG[t];
               const isCurrent = t === tier;
               const isPast = TIER_ORDER.indexOf(t) < TIER_ORDER.indexOf(tier);
@@ -104,7 +111,7 @@ function Perfil({ membro }: { membro: Membro }) {
                   <div
                     className="h-2 w-full rounded-full"
                     style={{
-                      background: isCurrent || isPast ? tcfg.color : "rgba(255,255,255,0.08)",
+                      background: isCurrent || isPast ? tcfg.color : "var(--hairline)",
                     }}
                   />
                   <span
@@ -120,15 +127,15 @@ function Perfil({ membro }: { membro: Membro }) {
 
           {nextTier && nextCfg ? (
             <>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10 mb-2">
+              <div className="h-1.5 w-full overflow-hidden rounded-full mb-2" style={{ background: "var(--hairline)" }}>
                 <div
                   className="h-full rounded-full transition-all duration-700"
                   style={{ width: `${Math.min(progress, 100)}%`, background: nextCfg.color }}
                 />
               </div>
-              <p className="text-xs text-[color:var(--ink-muted)]">
+              <p className="text-xs" style={{ color: "var(--ink-muted)" }}>
                 Faltam{" "}
-                <span className="font-semibold text-white">{mesesParaProximo} mes{mesesParaProximo !== 1 ? "es" : ""}</span>{" "}
+                <span className="font-semibold" style={{ color: "var(--ink)" }}>{mesesParaProximo} mes{mesesParaProximo !== 1 ? "es" : ""}</span>{" "}
                 para o tier{" "}
                 <span style={{ color: nextCfg.color }}>{nextCfg.label}</span>
               </p>
@@ -143,54 +150,54 @@ function Perfil({ membro }: { membro: Membro }) {
         {/* Pontos */}
         <div
           className="flex items-center justify-between rounded-xl border p-4"
-          style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.025)" }}
+          style={{ borderColor: "var(--card-border)", background: "var(--card-bg)" }}
         >
           <div>
-            <p className="text-xs text-[color:var(--ink-muted)] uppercase tracking-wider">Pontos acumulados</p>
-            <p className="font-display text-2xl font-extrabold text-white mt-0.5">{membro.pontos}</p>
+            <p className="text-xs uppercase tracking-wider" style={{ color: "var(--ink-muted)" }}>Pontos acumulados</p>
+            <p className="font-display text-2xl font-extrabold mt-0.5" style={{ color: "var(--ink)" }}>{membro.pontos}</p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] text-[color:var(--ink-muted)]">Use nos benefícios</p>
-            <p className="text-[10px] text-[color:var(--ink-muted)] mt-0.5">em breve</p>
+            <p className="text-[10px]" style={{ color: "var(--ink-muted)" }}>Use nos benefícios</p>
+            <p className="text-[10px] mt-0.5" style={{ color: "var(--ink-muted)" }}>em breve</p>
           </div>
         </div>
 
         {/* Indicação */}
         <section>
-          <h2 className="font-display text-base font-bold text-white mb-3">
+          <h2 className="font-display text-base font-bold mb-3" style={{ color: "var(--ink)" }}>
             Programa de indicação
           </h2>
           <div
             className="rounded-xl border p-5"
             style={{ borderColor: "rgba(0,230,118,0.15)", background: "rgba(0,230,118,0.04)" }}
           >
-            <p className="text-sm text-[color:var(--ink-muted)] mb-4">
+            <p className="text-sm mb-4" style={{ color: "var(--ink-muted)" }}>
               Compartilhe seu link exclusivo. A cada novo motorista aprovado, você ganha{" "}
-              <span className="font-semibold text-white">500 pontos</span>.
+              <span className="font-semibold" style={{ color: "var(--ink)" }}>500 pontos</span>.
             </p>
 
             <div
               className="flex items-center gap-3 rounded-lg border px-4 py-3 mb-3"
-              style={{ borderColor: "rgba(255,255,255,0.10)", background: "rgba(255,255,255,0.04)" }}
+              style={{ borderColor: "var(--input-border)", background: "var(--input-bg)" }}
             >
-              <span className="flex-1 truncate text-xs text-white font-mono">{indicacaoLink}</span>
+              <span className="flex-1 truncate text-xs font-mono" style={{ color: "var(--ink)" }}>{indicacaoLink}</span>
               <button
                 onClick={copyLink}
                 className="shrink-0 grid h-8 w-8 place-items-center rounded-md transition-colors"
-                style={{ background: copied ? "rgba(0,230,118,0.15)" : "rgba(255,255,255,0.06)" }}
+                style={{ background: copied ? "rgba(0,230,118,0.15)" : "var(--card-bg)" }}
                 aria-label="Copiar link"
               >
                 {copied ? (
-                  <Check className="h-4 w-4 text-[color:var(--gain)]" />
+                  <Check className="h-4 w-4" style={{ color: "var(--gain)" }} />
                 ) : (
-                  <Copy className="h-4 w-4 text-[color:var(--ink-muted)]" />
+                  <Copy className="h-4 w-4" style={{ color: "var(--ink-muted)" }} />
                 )}
               </button>
             </div>
 
-            <p className="text-center text-[10px] text-[color:var(--ink-muted)]">
+            <p className="text-center text-[10px]" style={{ color: "var(--ink-muted)" }}>
               Código:{" "}
-              <span className="font-bold text-white uppercase tracking-widest">
+              <span className="font-bold uppercase tracking-widest" style={{ color: "var(--ink)" }}>
                 {membro.codigo_indicacao}
               </span>
             </p>
@@ -198,14 +205,35 @@ function Perfil({ membro }: { membro: Membro }) {
         </section>
 
         {/* Links rápidos */}
-        <section className="rounded-xl border overflow-hidden"
-          style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+        <section
+          className="rounded-xl border overflow-hidden"
+          style={{ borderColor: "var(--card-border)" }}
+        >
           <QuickLink label="Benefícios disponíveis" to="/clube/beneficios" />
           <QuickLink label="Início do clube" to="/clube/dashboard" />
+
+          {/* Tema */}
+          <button
+            onClick={handleToggleTema}
+            className="flex w-full items-center justify-between px-4 py-4 text-sm transition-colors border-t"
+            style={{ borderColor: "var(--hairline)", color: "var(--ink-muted)" }}
+          >
+            <span>
+              {tema === "dark" ? "Tema claro" : "Tema escuro"}
+            </span>
+            <div className="flex items-center gap-2">
+              {tema === "dark" ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </div>
+          </button>
+
           <Link
             to="/"
-            className="flex items-center justify-between px-4 py-4 text-sm text-[color:var(--ink-muted)] transition-colors hover:bg-white/[0.03] border-t"
-            style={{ borderColor: "rgba(255,255,255,0.07)" }}
+            className="flex items-center justify-between px-4 py-4 text-sm transition-colors border-t"
+            style={{ borderColor: "var(--hairline)", color: "var(--ink-muted)" }}
           >
             <span>Site e-Drive Go</span>
             <ChevronRight className="h-4 w-4" />
@@ -216,14 +244,14 @@ function Perfil({ membro }: { membro: Membro }) {
         <button
           onClick={handleLogout}
           disabled={loggingOut}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border py-4 text-sm font-semibold text-[color:var(--loss)] transition-colors hover:bg-[color:var(--loss)]/[0.06] disabled:opacity-60"
-          style={{ borderColor: "rgba(240,68,56,0.20)" }}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border py-4 text-sm font-semibold transition-colors disabled:opacity-60"
+          style={{ borderColor: "rgba(240,68,56,0.20)", color: "var(--loss)" }}
         >
           <LogOut className="h-4 w-4" />
           {loggingOut ? "Saindo..." : "Sair da conta"}
         </button>
 
-        <p className="pb-4 text-center text-xs text-[color:var(--ink-muted)]">
+        <p className="pb-4 text-center text-xs" style={{ color: "var(--ink-muted)" }}>
           Clube e-Drive Go · {firstName}, motorista parceiro
         </p>
       </div>
@@ -235,8 +263,8 @@ function QuickLink({ label, to }: { label: string; to: string }) {
   return (
     <Link
       to={to as "/clube/beneficios" | "/clube/dashboard"}
-      className="flex items-center justify-between px-4 py-4 text-sm text-[color:var(--ink-muted)] transition-colors hover:bg-white/[0.03] border-b last:border-b-0"
-      style={{ borderColor: "rgba(255,255,255,0.07)" }}
+      className="flex items-center justify-between px-4 py-4 text-sm transition-colors border-b last:border-b-0"
+      style={{ borderColor: "var(--hairline)", color: "var(--ink-muted)" }}
     >
       <span>{label}</span>
       <ChevronRight className="h-4 w-4" />
@@ -247,7 +275,7 @@ function QuickLink({ label, to }: { label: string; to: string }) {
 function FullLoader() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-[color:var(--gain)]" />
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-t-[color:var(--gain)]" style={{ borderColor: "var(--hairline)" }} />
     </div>
   );
 }

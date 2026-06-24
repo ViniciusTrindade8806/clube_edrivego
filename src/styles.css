@@ -50,6 +50,16 @@
   --loss: #F04438;
   --gain: #00E676;
 
+  /* overlay primitives — flip in .light */
+  --glass: rgba(12, 12, 12, 0.97);
+  --card-bg: rgba(255, 255, 255, 0.030);
+  --card-bg-dim: rgba(255, 255, 255, 0.015);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-border-dim: rgba(255, 255, 255, 0.05);
+  --lock-bg: rgba(12, 12, 12, 0.55);
+  --input-bg: rgba(255, 255, 255, 0.06);
+  --input-border: rgba(255, 255, 255, 0.10);
+
   --background: var(--surface);
   --foreground: var(--ink);
   --card: var(--surface-2);
@@ -61,7 +71,30 @@
   --muted: #1C1C1C;
   --muted-foreground: var(--ink-muted);
   --border: var(--hairline);
-  --input: rgba(255, 255, 255, 0.06);
+  --input: var(--input-bg);
+}
+
+.light {
+  --surface: #F5F5F7;
+  --surface-2: #EBEBED;
+  --ink: #111111;
+  --ink-muted: #6E6E73;
+  --hairline: rgba(0, 0, 0, 0.08);
+
+  --glass: rgba(245, 245, 247, 0.97);
+  --card-bg: rgba(0, 0, 0, 0.030);
+  --card-bg-dim: rgba(0, 0, 0, 0.015);
+  --card-border: rgba(0, 0, 0, 0.08);
+  --card-border-dim: rgba(0, 0, 0, 0.05);
+  --lock-bg: rgba(245, 245, 247, 0.55);
+  --input-bg: rgba(0, 0, 0, 0.05);
+  --input-border: rgba(0, 0, 0, 0.12);
+
+  --secondary: #E8E8EA;
+  --secondary-foreground: #111111;
+  --muted: #E8E8EA;
+  --muted-foreground: var(--ink-muted);
+  --card: #EBEBED;
 }
 
 @layer base {

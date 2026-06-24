@@ -64,10 +64,10 @@ function Dashboard({ membro }: { membro: Membro }) {
         >
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-xs text-[color:var(--ink-muted)] mb-1">
+              <p className="text-xs mb-1" style={{ color: "var(--ink-muted)" }}>
                 Olá, {firstName} 👋
               </p>
-              <h1 className="font-display text-xl font-bold text-white">
+              <h1 className="font-display text-xl font-bold" style={{ color: "var(--ink)" }}>
                 Bem-vindo ao Clube
               </h1>
             </div>
@@ -76,7 +76,7 @@ function Dashboard({ membro }: { membro: Membro }) {
 
           <div className="mt-5">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-[color:var(--ink-muted)]">
+              <span className="text-xs" style={{ color: "var(--ink-muted)" }}>
                 {membro.meses_contrato} mes{membro.meses_contrato !== 1 ? "es" : ""} de contrato
               </span>
               {nextTier && nextCfg ? (
@@ -90,7 +90,7 @@ function Dashboard({ membro }: { membro: Membro }) {
               )}
             </div>
 
-            <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
+            <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--hairline)" }}>
               <div
                 className="h-full rounded-full transition-all duration-700"
                 style={{
@@ -101,7 +101,7 @@ function Dashboard({ membro }: { membro: Membro }) {
             </div>
 
             {nextTier && (
-              <div className="mt-2 flex justify-between text-[10px] text-[color:var(--ink-muted)]">
+              <div className="mt-2 flex justify-between text-[10px]" style={{ color: "var(--ink-muted)" }}>
                 <span style={{ color: cfg.color }}>{cfg.label}</span>
                 <span style={{ color: nextCfg?.color }}>{nextCfg?.label}</span>
               </div>
@@ -135,12 +135,13 @@ function Dashboard({ membro }: { membro: Membro }) {
         {destaques.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="font-display text-base font-bold text-white">
+              <h2 className="font-display text-base font-bold" style={{ color: "var(--ink)" }}>
                 Disponíveis agora
               </h2>
               <Link
                 to="/clube/beneficios"
-                className="flex items-center gap-1 text-xs font-medium text-[color:var(--gain)]"
+                className="flex items-center gap-1 text-xs font-medium"
+                style={{ color: "var(--gain)" }}
               >
                 Ver todos <ArrowRight className="h-3 w-3" />
               </Link>
@@ -152,17 +153,22 @@ function Dashboard({ membro }: { membro: Membro }) {
                   <div
                     key={b.id}
                     className="flex items-center gap-3 rounded-lg border p-4"
-                    style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.025)" }}
+                    style={{ borderColor: "var(--card-border)", background: "var(--card-bg)" }}
                   >
-                    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border text-lg"
-                      style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                    <div
+                      className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border text-lg"
+                      style={{ borderColor: "var(--card-border)" }}
+                    >
                       {cat?.icon ?? "✦"}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-white leading-tight truncate">{b.titulo}</p>
-                      <p className="text-xs text-[color:var(--ink-muted)] truncate mt-0.5">{b.descricao}</p>
+                      <p className="text-sm font-semibold leading-tight truncate" style={{ color: "var(--ink)" }}>{b.titulo}</p>
+                      <p className="text-xs truncate mt-0.5" style={{ color: "var(--ink-muted)" }}>{b.descricao}</p>
                     </div>
-                    <span className="shrink-0 rounded-md bg-[color:var(--gain)]/10 px-2 py-0.5 text-[10px] font-bold text-[color:var(--gain)]">
+                    <span
+                      className="shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold"
+                      style={{ background: "rgba(0,230,118,0.10)", color: "var(--gain)" }}
+                    >
                       {b.valor}
                     </span>
                   </div>
@@ -175,7 +181,7 @@ function Dashboard({ membro }: { membro: Membro }) {
         {/* Próximos tiers */}
         {tier !== "ouro" && (
           <section>
-            <h2 className="font-display text-base font-bold text-white mb-3">
+            <h2 className="font-display text-base font-bold mb-3" style={{ color: "var(--ink)" }}>
               Desbloqueie no próximo tier
             </h2>
             <div className="space-y-3">
@@ -188,15 +194,17 @@ function Dashboard({ membro }: { membro: Membro }) {
                   <div
                     key={b.id}
                     className="flex items-center gap-3 rounded-lg border p-4 opacity-50"
-                    style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}
+                    style={{ borderColor: "var(--card-border-dim)", background: "var(--card-bg-dim)" }}
                   >
-                    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border text-lg"
-                      style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                    <div
+                      className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border text-lg"
+                      style={{ borderColor: "var(--card-border-dim)" }}
+                    >
                       {cat?.icon ?? "✦"}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-white leading-tight truncate">{b.titulo}</p>
-                      <p className="text-xs text-[color:var(--ink-muted)] truncate mt-0.5">{b.descricao}</p>
+                      <p className="text-sm font-semibold leading-tight truncate" style={{ color: "var(--ink)" }}>{b.titulo}</p>
+                      <p className="text-xs truncate mt-0.5" style={{ color: "var(--ink-muted)" }}>{b.descricao}</p>
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-1">
                       <Lock className="h-3.5 w-3.5" style={{ color: reqCfg.color }} />
@@ -217,17 +225,18 @@ function Dashboard({ membro }: { membro: Membro }) {
           style={{ borderColor: "rgba(0,230,118,0.15)", background: "rgba(0,230,118,0.04)" }}
         >
           <div className="flex items-start gap-3">
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[color:var(--gain)]/10">
-              <Zap className="h-5 w-5 text-[color:var(--gain)]" />
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg" style={{ background: "rgba(0,230,118,0.10)" }}>
+              <Zap className="h-5 w-5" style={{ color: "var(--gain)" }} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-bold text-white">Indique e ganhe pontos</p>
-              <p className="mt-1 text-xs text-[color:var(--ink-muted)]">
+              <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>Indique e ganhe pontos</p>
+              <p className="mt-1 text-xs" style={{ color: "var(--ink-muted)" }}>
                 500 pontos por cada motorista aprovado que você indicar.
               </p>
               <Link
                 to="/clube/perfil"
-                className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[color:var(--gain)]"
+                className="mt-3 inline-flex items-center gap-1 text-xs font-semibold"
+                style={{ color: "var(--gain)" }}
               >
                 Ver meu código <ArrowRight className="h-3 w-3" />
               </Link>
@@ -253,13 +262,13 @@ function StatCard({
   return (
     <div
       className="rounded-lg border p-4 text-center"
-      style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.025)" }}
+      style={{ borderColor: "var(--card-border)", background: "var(--card-bg)" }}
     >
       <div className="mb-2 flex justify-center" style={{ color }}>
         {icon}
       </div>
-      <div className="font-display text-lg font-extrabold text-white">{value}</div>
-      <div className="mt-0.5 text-[10px] uppercase tracking-wide text-[color:var(--ink-muted)]">{label}</div>
+      <div className="font-display text-lg font-extrabold" style={{ color: "var(--ink)" }}>{value}</div>
+      <div className="mt-0.5 text-[10px] uppercase tracking-wide" style={{ color: "var(--ink-muted)" }}>{label}</div>
     </div>
   );
 }
@@ -267,7 +276,7 @@ function StatCard({
 function FullLoader() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-[color:var(--gain)]" />
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-t-[color:var(--gain)]" style={{ borderColor: "var(--hairline)" }} />
     </div>
   );
 }

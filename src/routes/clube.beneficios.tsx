@@ -56,8 +56,8 @@ function Beneficios({ membro }: { membro: Membro }) {
       <div className="mx-auto max-w-lg px-4 py-6">
         {/* Header */}
         <div className="mb-5">
-          <h1 className="font-display text-xl font-bold text-white">Benefícios</h1>
-          <p className="mt-1 text-sm text-[color:var(--ink-muted)]">
+          <h1 className="font-display text-xl font-bold" style={{ color: "var(--ink)" }}>Benefícios</h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--ink-muted)" }}>
             {disponiveis} disponíve{disponiveis !== 1 ? "is" : "l"} ·{" "}
             {emBreve} em breve ·{" "}
             {bloqueados > 0 && `${bloqueados} bloqueado${bloqueados !== 1 ? "s" : ""}`}
@@ -75,7 +75,7 @@ function Beneficios({ membro }: { membro: Membro }) {
                   onClick={() => setCategoriaAtiva(cat.id)}
                   className="shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all"
                   style={{
-                    borderColor: active ? "var(--gain)" : "rgba(255,255,255,0.10)",
+                    borderColor: active ? "var(--gain)" : "var(--input-border)",
                     background: active ? "rgba(0,230,118,0.10)" : "transparent",
                     color: active ? "var(--gain)" : "var(--ink-muted)",
                   }}
@@ -93,7 +93,7 @@ function Beneficios({ membro }: { membro: Membro }) {
             <BenefitCard key={b.id} beneficio={b} memberTier={tier} />
           ))}
           {filtrados.length === 0 && (
-            <div className="py-16 text-center text-sm text-[color:var(--ink-muted)]">
+            <div className="py-16 text-center text-sm" style={{ color: "var(--ink-muted)" }}>
               Nenhum benefício nesta categoria ainda.
             </div>
           )}
@@ -118,14 +118,16 @@ function BenefitCard({
     <div
       className="relative overflow-hidden rounded-xl border p-4 transition-all"
       style={{
-        borderColor: isLocked ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.08)",
-        background: isLocked ? "rgba(255,255,255,0.015)" : "rgba(255,255,255,0.03)",
+        borderColor: isLocked ? "var(--card-border-dim)" : "var(--card-border)",
+        background: isLocked ? "var(--card-bg-dim)" : "var(--card-bg)",
       }}
     >
       {/* Lock overlay */}
       {isLocked && (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1.5 rounded-xl"
-          style={{ backdropFilter: "blur(2px)", background: "rgba(12,12,12,0.5)" }}>
+        <div
+          className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1.5 rounded-xl"
+          style={{ backdropFilter: "blur(2px)", background: "var(--lock-bg)" }}
+        >
           <Lock className="h-5 w-5" style={{ color: reqCfg.color }} />
           <span className="text-xs font-semibold" style={{ color: reqCfg.color }}>
             Disponível no {reqCfg.label}
@@ -137,7 +139,7 @@ function BenefitCard({
         {/* Ícone da categoria */}
         <div
           className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border text-xl"
-          style={{ borderColor: "rgba(255,255,255,0.08)" }}
+          style={{ borderColor: "var(--card-border)" }}
         >
           {cat?.icon ?? "✦"}
         </div>
@@ -146,25 +148,31 @@ function BenefitCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--ink-muted)]">
+              <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--ink-muted)" }}>
                 {cat?.label}
               </p>
-              <h3 className="font-display text-sm font-bold text-white leading-snug">
+              <h3 className="font-display text-sm font-bold leading-snug" style={{ color: "var(--ink)" }}>
                 {beneficio.titulo}
               </h3>
             </div>
             <TierBadge tier={beneficio.tier_minimo} size="sm" />
           </div>
-          <p className="mt-1.5 text-xs leading-relaxed text-[color:var(--ink-muted)]">
+          <p className="mt-1.5 text-xs leading-relaxed" style={{ color: "var(--ink-muted)" }}>
             {beneficio.descricao}
           </p>
           <div className="mt-3">
             {beneficio.em_breve ? (
-              <span className="inline-flex items-center rounded-md bg-white/[0.05] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-[color:var(--ink-muted)]">
+              <span
+                className="inline-flex items-center rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide"
+                style={{ background: "var(--card-bg)", color: "var(--ink-muted)" }}
+              >
                 Em breve
               </span>
             ) : (
-              <span className="inline-flex items-center rounded-md bg-[color:var(--gain)]/10 px-2.5 py-1 text-[10px] font-bold text-[color:var(--gain)]">
+              <span
+                className="inline-flex items-center rounded-md px-2.5 py-1 text-[10px] font-bold"
+                style={{ background: "rgba(0,230,118,0.10)", color: "var(--gain)" }}
+              >
                 {beneficio.valor}
               </span>
             )}
@@ -178,7 +186,7 @@ function BenefitCard({
 function FullLoader() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-[color:var(--gain)]" />
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-t-[color:var(--gain)]" style={{ borderColor: "var(--hairline)" }} />
     </div>
   );
 }
