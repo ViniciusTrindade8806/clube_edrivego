@@ -95,7 +95,7 @@ function Dashboard({ membro }: { membro: Membro }) {
                 className="h-full rounded-full transition-all duration-700"
                 style={{
                   width: `${Math.min(progress, 100)}%`,
-                  background: nextTier && nextCfg ? nextCfg.color : cfg.color,
+                  background: cfg.color,
                 }}
               />
             </div>

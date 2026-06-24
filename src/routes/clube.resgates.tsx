@@ -64,33 +64,42 @@ function Resgates({ membro: membroInicial }: { membro: Membro }) {
     setSalvando(true);
     const novosPontos = membro.pontos - recompensa.pontos;
 
-    await supabase.from("membros").update({ pontos: novosPontos }).eq("id", membro.id);
-    await supabase.from("pontos_transacoes").insert({
+    // Atualização otimista — UI responde imediatamente
+    setMembro((prev) => ({ ...prev, pontos: novosPontos }));
+    setConfirmId(null);
+
+    const transacaoLocal: PontoTransacao = {
+      id: crypto.randomUUID(),
       membro_id: membro.id,
       valor: -recompensa.pontos,
       descricao: `Resgate: ${recompensa.titulo}`,
       tipo: "resgate",
-    });
-    const { data: novoResgate } = await supabase.from("resgates").insert({
-      membro_id: membro.id,
-      recompensa: recompensa.titulo,
-      pontos_custo: recompensa.pontos,
-    }).select().single();
+      created_at: new Date().toISOString(),
+    };
+    setTransacoes((prev) => [transacaoLocal, ...prev]);
 
-    if (novoResgate) {
-      setMembro((prev) => ({ ...prev, pontos: novosPontos }));
-      setResgates((prev) => [novoResgate as Resgate, ...prev]);
-      setTransacoes((prev) => [{
-        id: crypto.randomUUID(),
+    // Operações no banco em paralelo
+    const [, , { data: novoResgate }] = await Promise.all([
+      supabase.from("membros").update({ pontos: novosPontos }).eq("id", membro.id),
+      supabase.from("pontos_transacoes").insert({
         membro_id: membro.id,
         valor: -recompensa.pontos,
         descricao: `Resgate: ${recompensa.titulo}`,
         tipo: "resgate",
-        created_at: new Date().toISOString(),
-      }, ...prev]);
-      setPopup(recompensa);
+      }),
+      supabase.from("resgates").insert({
+        membro_id: membro.id,
+        recompensa: recompensa.titulo,
+        pontos_custo: recompensa.pontos,
+      }).select().single(),
+    ]);
+
+    if (novoResgate) {
+      setResgates((prev) => [novoResgate as Resgate, ...prev]);
     }
-    setConfirmId(null);
+
+    // Popup aparece sempre, independente do resultado do banco
+    setPopup(recompensa);
     setSalvando(false);
   }
 

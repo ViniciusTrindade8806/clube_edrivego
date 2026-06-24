@@ -40,6 +40,8 @@ function Perfil({ membro: membroInicial }: { membro: Membro }) {
   const [copied, setCopied] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [imgError, setImgError] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -65,13 +67,27 @@ function Perfil({ membro: membroInicial }: { membro: Membro }) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
+    setUploadError(null);
+    setImgError(false);
     const ext = file.name.split(".").pop() ?? "jpg";
     const path = `${membro.id}/avatar.${ext}`;
-    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-    if (!error) {
-      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      const url = `${data.publicUrl}?t=${Date.now()}`;
-      await supabase.from("membros").update({ avatar_url: url }).eq("id", membro.id);
+    const { error: storageError } = await supabase.storage
+      .from("avatars")
+      .upload(path, file, { upsert: true });
+    if (storageError) {
+      setUploadError(`Erro no upload: ${storageError.message}`);
+      setUploading(false);
+      return;
+    }
+    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+    const url = `${data.publicUrl}?t=${Date.now()}`;
+    const { error: dbError } = await supabase
+      .from("membros")
+      .update({ avatar_url: url })
+      .eq("id", membro.id);
+    if (dbError) {
+      setUploadError(`Erro ao salvar: ${dbError.message}`);
+    } else {
       setMembro((prev) => ({ ...prev, avatar_url: url }));
     }
     setUploading(false);
@@ -97,8 +113,13 @@ function Perfil({ membro: membroInicial }: { membro: Membro }) {
                 boxShadow: tier !== "ouro" ? TIER_GLOW[tier] : undefined,
               }}
             >
-              {membro.avatar_url ? (
-                <img src={membro.avatar_url} alt="avatar" className="h-full w-full object-cover" />
+              {membro.avatar_url && !imgError ? (
+                <img
+                  src={membro.avatar_url}
+                  alt="avatar"
+                  className="h-full w-full object-cover"
+                  onError={() => setImgError(true)}
+                />
               ) : (
                 <div className="h-full w-full flex items-center justify-center text-2xl font-bold"
                   style={{ background: cfg.bg, color: cfg.color }}>
@@ -119,6 +140,9 @@ function Perfil({ membro: membroInicial }: { membro: Membro }) {
             </button>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
           </div>
+          {uploadError && (
+            <p className="text-xs mt-1" style={{ color: "var(--loss)" }}>{uploadError}</p>
+          )}
 
           <div className="min-w-0 flex-1">
             <h1 className="font-display text-xl font-bold truncate" style={{ color: "var(--ink)" }}>{membro.nome}</h1>
@@ -145,7 +169,7 @@ function Perfil({ membro: membroInicial }: { membro: Membro }) {
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--hairline)" }}>
             <div className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${Math.min(progress, 100)}%`, background: nextCfg?.color ?? cfg.color }} />
+              style={{ width: `${Math.min(progress, 100)}%`, background: cfg.color }} />
           </div>
           <div className="mt-2 flex justify-between text-[10px]">
             {TIER_ORDER.map((t) => {
@@ -192,23 +216,31 @@ function Perfil({ membro: membroInicial }: { membro: Membro }) {
                   className={`rounded-xl border p-3 flex flex-col gap-2 relative overflow-hidden ${isCurrent && t === "ouro" ? "tier-ouro-pulse" : ""}`}
                   style={{
                     borderColor: isCurrent ? tc.color : isLocked ? "var(--card-border-dim)" : tc.border,
-                    background: isCurrent ? tc.bg : isLocked ? "var(--card-bg-dim)" : "var(--card-bg)",
-                    boxShadow: isCurrent ? TIER_GLOW[t] : undefined,
-                    opacity: isLocked ? 0.6 : 1,
+                    background: isCurrent ? tc.bg : isPast ? `${tc.bg}` : "var(--card-bg-dim)",
+                    boxShadow: isCurrent ? TIER_GLOW[t] : isPast ? TIER_GLOW[t] : undefined,
+                    opacity: isLocked ? 0.55 : 1,
                   }}>
+                  {/* Badge de status */}
                   {isCurrent && (
                     <span className="absolute top-1.5 right-1.5 text-[8px] font-bold uppercase px-1 py-0.5 rounded"
                       style={{ background: tc.color, color: "#000" }}>
                       Atual
                     </span>
                   )}
+                  {isPast && (
+                    <span className="absolute top-1.5 right-1.5 text-[9px]">✓</span>
+                  )}
+                  {isLocked && (
+                    <Lock className="absolute top-1.5 right-1.5 h-3 w-3" style={{ color: tc.color }} />
+                  )}
                   <p className="font-display text-xs font-extrabold" style={{ color: tc.color }}>{tc.label}</p>
                   <p className="text-[9px]" style={{ color: "var(--ink-muted)" }}>
                     {tc.min_meses}+ meses
                   </p>
                   <div className="border-t pt-2" style={{ borderColor: "var(--hairline)" }}>
-                    <p className="text-[9px] font-bold mb-1" style={{ color: isLocked ? "var(--ink-muted)" : tc.color }}>
-                      +{count} exclusivos
+                    <p className="text-[9px] font-bold mb-1"
+                      style={{ color: isLocked ? "var(--ink-muted)" : tc.color }}>
+                      {isPast ? "✓ Conquistado" : `+${count} exclusivos`}
                     </p>
                     {key.map((b) => (
                       <p key={b.id} className="text-[8px] truncate" style={{ color: "var(--ink-muted)" }}>
@@ -216,9 +248,6 @@ function Perfil({ membro: membroInicial }: { membro: Membro }) {
                       </p>
                     ))}
                   </div>
-                  {isLocked && (
-                    <Lock className="absolute bottom-2 right-2 h-3 w-3" style={{ color: tc.color }} />
-                  )}
                 </div>
               );
             })}

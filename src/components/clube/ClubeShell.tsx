@@ -3,7 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { TierBadge } from "@/components/clube/TierBadge";
 import type { Tier } from "@/lib/clube";
 import { getTheme, toggleTheme, type Theme } from "@/lib/theme";
-import { LayoutDashboard, Gift, User, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, Gift, User, Sun, Moon, Trophy } from "lucide-react";
 
 interface ClubeShellProps {
   children: ReactNode;
@@ -13,6 +13,7 @@ interface ClubeShellProps {
 const NAV = [
   { to: "/clube/dashboard" as const, icon: LayoutDashboard, label: "Início" },
   { to: "/clube/beneficios" as const, icon: Gift, label: "Benefícios" },
+  { to: "/clube/ranking" as const, icon: Trophy, label: "Ranking" },
   { to: "/clube/perfil" as const, icon: User, label: "Perfil" },
 ];
 
@@ -61,7 +62,7 @@ export function ClubeShell({ children, tier }: ClubeShellProps) {
               ? <Sun className="h-4 w-4" style={{ color: "var(--ink-muted)" }} />
               : <Moon className="h-4 w-4" style={{ color: "var(--ink-muted)" }} />}
           </button>
-          {tier && <TierBadge tier={tier} size="sm" />}
+          {tier && <TierBadge tier={tier} size="sm" glow />}
         </div>
       </header>
 
