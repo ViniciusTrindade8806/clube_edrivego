@@ -107,6 +107,16 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  /* <option> não herda CSS variables — forçar cores fixas por tema */
+  select option {
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+  .light select option {
+    background-color: #ffffff;
+    color: #111111;
+  }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
