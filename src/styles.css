@@ -79,7 +79,9 @@
   --surface-2: #EBEBED;
   --ink: #111111;
   --ink-muted: #6E6E73;
-  --hairline: rgba(0, 0, 0, 0.08);
+  --hairline: rgba(0, 0, 0, 0.12);
+  --gain: #059669;
+  --loss: #DC2626;
 
   --glass: rgba(245, 245, 247, 0.97);
   --card-bg: rgba(0, 0, 0, 0.030);
@@ -125,3 +127,9 @@
 
 @utility font-display { font-family: var(--font-display); }
 @utility font-sans   { font-family: var(--font-sans); }
+
+@keyframes ouro-pulse {
+  0%, 100% { box-shadow: 0 0 18px rgba(201,162,39,0.55), 0 0 36px rgba(201,162,39,0.25), 0 0 60px rgba(201,162,39,0.10); }
+  50%       { box-shadow: 0 0 26px rgba(201,162,39,0.75), 0 0 52px rgba(201,162,39,0.38), 0 0 80px rgba(201,162,39,0.18); }
+}
+.tier-ouro-pulse { animation: ouro-pulse 2.4s ease-in-out infinite; }

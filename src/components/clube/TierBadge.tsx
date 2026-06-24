@@ -1,11 +1,12 @@
-import { TIER_CONFIG, type Tier } from "@/lib/clube";
+import { TIER_CONFIG, TIER_GLOW, type Tier } from "@/lib/clube";
 
 interface TierBadgeProps {
   tier: Tier;
   size?: "sm" | "md" | "lg";
+  glow?: boolean;
 }
 
-export function TierBadge({ tier, size = "md" }: TierBadgeProps) {
+export function TierBadge({ tier, size = "md", glow = false }: TierBadgeProps) {
   const cfg = TIER_CONFIG[tier];
   const cls = {
     sm: "px-2 py-0.5 text-[10px] gap-1",
@@ -16,7 +17,12 @@ export function TierBadge({ tier, size = "md" }: TierBadgeProps) {
   return (
     <span
       className={`inline-flex items-center rounded-full font-bold uppercase tracking-wider ${cls}`}
-      style={{ color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}` }}
+      style={{
+        color: cfg.color,
+        background: cfg.bg,
+        border: `1px solid ${cfg.border}`,
+        boxShadow: glow ? TIER_GLOW[tier] : undefined,
+      }}
     >
       <span className="rounded-full" style={{ width: 6, height: 6, background: cfg.color }} />
       {cfg.label}

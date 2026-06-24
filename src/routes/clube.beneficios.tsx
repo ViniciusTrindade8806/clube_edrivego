@@ -67,21 +67,17 @@ function Beneficios({ membro }: { membro: Membro }) {
   return (
     <ClubeShell tier={tier}>
       <div className="mx-auto max-w-lg px-4 py-6">
+
         {/* Segment control */}
-        <div
-          className="flex rounded-xl p-1 mb-5"
-          style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}
-        >
+        <div className="flex rounded-xl p-1 mb-5"
+          style={{ background: "var(--card-bg)", border: "1px solid var(--card-border)" }}>
           {(["clube", "parceiros"] as Aba[]).map((a) => (
-            <button
-              key={a}
-              onClick={() => setAba(a)}
+            <button key={a} onClick={() => setAba(a)}
               className="flex-1 rounded-lg py-2 text-sm font-semibold transition-all"
               style={{
                 background: aba === a ? "#4B0081" : "transparent",
                 color: aba === a ? "#fff" : "var(--ink-muted)",
-              }}
-            >
+              }}>
               {a === "clube" ? "🎖️ Clube" : "🤝 Parceiros"}
             </button>
           ))}
@@ -91,33 +87,46 @@ function Beneficios({ membro }: { membro: Membro }) {
         {aba === "clube" && (
           <>
             <div className="mb-5">
-              <h1 className="font-display text-xl font-bold" style={{ color: "var(--ink)" }}>Benefícios do Clube</h1>
+              <h1 className="font-display text-xl font-bold" style={{ color: "var(--ink)" }}>
+                Benefícios do Clube
+              </h1>
               <p className="mt-1 text-sm" style={{ color: "var(--ink-muted)" }}>
                 {disponiveis} disponíve{disponiveis !== 1 ? "is" : "l"} com seu tier atual
               </p>
             </div>
 
-            {/* Filtro de categorias */}
-            <div className="mb-5 -mx-4 px-4">
-              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-                {CATEGORIAS.map((cat) => {
-                  const active = categoriaAtiva === cat.id;
-                  return (
-                    <button
-                      key={cat.id}
-                      onClick={() => setCategoriaAtiva(cat.id)}
-                      className="shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all"
+            {/* Grade de categorias */}
+            <div className="grid grid-cols-3 gap-2.5 mb-6">
+              {CATEGORIAS.map((cat) => {
+                const active = categoriaAtiva === cat.id;
+                const count = cat.id === "todas"
+                  ? BENEFICIOS.length
+                  : BENEFICIOS.filter((b) => b.categoria_id === cat.id).length;
+                return (
+                  <button key={cat.id} onClick={() => setCategoriaAtiva(cat.id)}
+                    className="flex flex-col items-center gap-2 rounded-xl py-4 px-2 border transition-all"
+                    style={{
+                      borderColor: active ? (cat.id === "todas" ? "#4B0081" : "var(--gain)") : "var(--card-border)",
+                      background: active
+                        ? cat.id === "todas" ? "rgba(75,0,129,0.12)" : "rgba(0,230,118,0.08)"
+                        : "var(--card-bg)",
+                      boxShadow: active ? `0 0 0 1px ${cat.id === "todas" ? "#4B0081" : "var(--gain)"}` : undefined,
+                    }}>
+                    <span className="text-2xl">{cat.icon}</span>
+                    <span className="text-[10px] font-semibold leading-tight text-center"
+                      style={{ color: active ? (cat.id === "todas" ? "#4B0081" : "var(--gain)") : "var(--ink-muted)" }}>
+                      {cat.label}
+                    </span>
+                    <span className="text-[9px] font-bold rounded-full px-1.5 py-0.5"
                       style={{
-                        borderColor: active ? "var(--gain)" : "var(--input-border)",
-                        background: active ? "rgba(0,230,118,0.10)" : "transparent",
-                        color: active ? "var(--gain)" : "var(--ink-muted)",
-                      }}
-                    >
-                      {cat.icon} {cat.label}
-                    </button>
-                  );
-                })}
-              </div>
+                        background: active ? (cat.id === "todas" ? "rgba(75,0,129,0.15)" : "rgba(0,230,118,0.12)") : "var(--card-bg-dim)",
+                        color: active ? (cat.id === "todas" ? "#4B0081" : "var(--gain)") : "var(--ink-muted)",
+                      }}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
             <div className="space-y-3">
@@ -149,7 +158,7 @@ function Beneficios({ membro }: { membro: Membro }) {
               </div>
             ) : parceiros.length === 0 ? (
               <div className="py-20 text-center">
-                <p className="text-3xl mb-3">🤝</p>
+                <p className="text-4xl mb-3">🤝</p>
                 <p className="text-sm font-semibold" style={{ color: "var(--ink)" }}>Em breve</p>
                 <p className="text-xs mt-1" style={{ color: "var(--ink-muted)" }}>
                   Parceiros estão sendo negociados. Volte em breve!
@@ -169,63 +178,76 @@ function Beneficios({ membro }: { membro: Membro }) {
   );
 }
 
-/* ─── Benefit card (Clube) ─── */
+/* ─── Benefit card ─── */
 function BenefitCard({ beneficio, memberTier }: { beneficio: BeneficioStatic; memberTier: Tier }) {
   const isLocked = !canAccess(memberTier, beneficio.tier_minimo);
   const reqCfg = TIER_CONFIG[beneficio.tier_minimo];
   const cat = CATEGORIAS.find((c) => c.id === beneficio.categoria_id);
+  const isAvailable = !isLocked && !beneficio.em_breve;
 
   return (
-    <div
-      className="relative overflow-hidden rounded-xl border p-4 transition-all"
+    <div className="relative overflow-hidden rounded-xl border transition-all"
       style={{
-        borderColor: isLocked ? "var(--card-border-dim)" : "var(--card-border)",
+        borderColor: isLocked ? "var(--card-border-dim)" : isAvailable ? "var(--card-border)" : "var(--card-border-dim)",
         background: isLocked ? "var(--card-bg-dim)" : "var(--card-bg)",
-      }}
-    >
+      }}>
+
       {isLocked && (
-        <div
-          className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1.5 rounded-xl"
-          style={{ backdropFilter: "blur(2px)", background: "var(--lock-bg)" }}
-        >
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1.5 rounded-xl"
+          style={{ backdropFilter: "blur(2px)", background: "var(--lock-bg)" }}>
           <Lock className="h-5 w-5" style={{ color: reqCfg.color }} />
-          <span className="text-xs font-semibold" style={{ color: reqCfg.color }}>
+          <span className="text-xs font-bold" style={{ color: reqCfg.color }}>
             Disponível no {reqCfg.label}
           </span>
         </div>
       )}
-      <div className={`flex items-start gap-3 ${isLocked ? "opacity-40" : ""}`}>
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border text-xl"
-          style={{ borderColor: "var(--card-border)" }}>
-          {cat?.icon ?? "✦"}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--ink-muted)" }}>
-                {cat?.label}
-              </p>
-              <h3 className="font-display text-sm font-bold leading-snug" style={{ color: "var(--ink)" }}>
-                {beneficio.titulo}
-              </h3>
-            </div>
-            <TierBadge tier={beneficio.tier_minimo} size="sm" />
+
+      <div className={`p-4 ${isLocked ? "opacity-30" : ""}`}>
+        <div className="flex items-start gap-3">
+          {/* Ícone grande */}
+          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl text-2xl"
+            style={{
+              background: isAvailable ? `${reqCfg.bg}` : "var(--card-bg-dim)",
+              border: `1px solid ${isAvailable ? reqCfg.border : "var(--card-border-dim)"}`,
+            }}>
+            {cat?.icon ?? "✦"}
           </div>
-          <p className="mt-1.5 text-xs leading-relaxed" style={{ color: "var(--ink-muted)" }}>
-            {beneficio.descricao}
-          </p>
-          <div className="mt-3">
-            {beneficio.em_breve ? (
-              <span className="inline-flex items-center rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide"
-                style={{ background: "var(--card-bg)", color: "var(--ink-muted)" }}>
-                Em breve
-              </span>
-            ) : (
-              <span className="inline-flex items-center rounded-md px-2.5 py-1 text-[10px] font-bold"
-                style={{ background: "rgba(0,230,118,0.10)", color: "var(--gain)" }}>
-                {beneficio.valor}
-              </span>
-            )}
+
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--ink-muted)" }}>
+                  {cat?.label}
+                </p>
+                <h3 className="font-display text-sm font-bold leading-snug" style={{ color: "var(--ink)" }}>
+                  {beneficio.titulo}
+                </h3>
+              </div>
+              <TierBadge tier={beneficio.tier_minimo} size="sm" />
+            </div>
+            <p className="text-xs leading-relaxed" style={{ color: "var(--ink-muted)" }}>
+              {beneficio.descricao}
+            </p>
+
+            <div className="mt-3 flex items-center justify-between">
+              {beneficio.em_breve ? (
+                <span className="inline-flex items-center rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide"
+                  style={{ background: "var(--card-bg)", color: "var(--ink-muted)", border: "1px solid var(--card-border)" }}>
+                  Em breve
+                </span>
+              ) : (
+                <span className="inline-flex items-center rounded-md px-3 py-1 text-xs font-bold"
+                  style={{ background: "rgba(0,230,118,0.12)", color: "var(--gain)" }}>
+                  {beneficio.valor}
+                </span>
+              )}
+              {isAvailable && (
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                  style={{ background: "rgba(0,230,118,0.08)", color: "var(--gain)" }}>
+                  ✓ Ativo
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -247,10 +269,10 @@ function ParceiroCard({ parceiro, memberTier }: { parceiro: ParceiroComBeneficio
   }
 
   return (
-    <div className="rounded-xl border overflow-hidden" style={{ borderColor: "var(--card-border)", background: "var(--card-bg)" }}>
-      {/* Header do parceiro */}
+    <div className="rounded-xl border overflow-hidden"
+      style={{ borderColor: "var(--card-border)", background: "var(--card-bg)" }}>
       <div className="flex items-center gap-3 p-4">
-        <div className="h-12 w-12 shrink-0 rounded-xl border flex items-center justify-center text-2xl"
+        <div className="h-14 w-14 shrink-0 rounded-xl border flex items-center justify-center text-2xl"
           style={{ borderColor: "var(--card-border)", background: "var(--card-bg-dim)" }}>
           {parceiro.logo_emoji}
         </div>
@@ -265,13 +287,11 @@ function ParceiroCard({ parceiro, memberTier }: { parceiro: ParceiroComBeneficio
         </div>
       </div>
 
-      {/* Benefícios do parceiro */}
       {parceiro.beneficios_parceiros.length > 0 && (
         <div className="border-t divide-y" style={{ borderColor: "var(--hairline)" }}>
           {parceiro.beneficios_parceiros.map((b) => {
             const isLocked = !canAccess(memberTier, b.tier_minimo);
             const tcfg = TIER_CONFIG[b.tier_minimo];
-
             return (
               <div key={b.id} className="flex items-center gap-3 px-4 py-3">
                 <div className="flex-1 min-w-0">
@@ -296,8 +316,6 @@ function ParceiroCard({ parceiro, memberTier }: { parceiro: ParceiroComBeneficio
                     )}
                   </div>
                 </div>
-
-                {/* Cupom ou cadeado */}
                 {isLocked ? (
                   <div className="shrink-0 flex flex-col items-center gap-0.5">
                     <Lock className="h-4 w-4" style={{ color: tcfg.color }} />
@@ -306,19 +324,15 @@ function ParceiroCard({ parceiro, memberTier }: { parceiro: ParceiroComBeneficio
                     </span>
                   </div>
                 ) : b.cupom ? (
-                  <button
-                    onClick={() => copyCupom(b)}
+                  <button onClick={() => copyCupom(b)}
                     className="shrink-0 flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition-all"
                     style={{
                       background: copied === b.id ? "rgba(0,230,118,0.15)" : "rgba(0,230,118,0.10)",
                       color: "var(--gain)",
-                    }}
-                  >
-                    {copied === b.id ? (
-                      <><Check className="h-3.5 w-3.5" /> Copiado</>
-                    ) : (
-                      <><Tag className="h-3.5 w-3.5" /> {b.cupom}</>
-                    )}
+                    }}>
+                    {copied === b.id
+                      ? <><Check className="h-3.5 w-3.5" /> Copiado</>
+                      : <><Tag className="h-3.5 w-3.5" /> {b.cupom}</>}
                   </button>
                 ) : null}
               </div>

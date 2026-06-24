@@ -11,8 +11,15 @@ export interface Membro {
   meses_contrato: number;
   pontos: number;
   codigo_indicacao: string;
+  avatar_url?: string | null;
   created_at: string;
 }
+
+export const TIER_GLOW: Record<Tier, string> = {
+  bronze: "0 0 8px rgba(205,127,50,0.30), 0 0 18px rgba(205,127,50,0.12)",
+  prata:  "0 0 12px rgba(142,142,147,0.45), 0 0 28px rgba(142,142,147,0.20)",
+  ouro:   "0 0 18px rgba(201,162,39,0.60), 0 0 36px rgba(201,162,39,0.28), 0 0 60px rgba(201,162,39,0.12)",
+};
 
 export interface BeneficioStatic {
   id: string;
